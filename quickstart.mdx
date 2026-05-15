@@ -1,0 +1,72 @@
+---
+title: 'Quick Start: Trigger Your First AI Video with GVP Bridge'
+description: 'Install GVP Bridge, connect it to Grok in a dedicated browser, and trigger your first AI video generation from the gallery in minutes.'
+---
+
+This guide walks you through everything from a fresh install to watching your first AI video generation stream live in the app. The whole process takes about five minutes once GVP Bridge is installed.
+
+<Steps>
+  <Step title="Install GVP Bridge">
+    Download the installer for your operating system from the GVP Bridge releases page and run it. Follow the standard installation prompts for your platform — no additional configuration is required at this stage.
+
+    <Note>
+      If you have not installed GVP Bridge yet, see the [installation guide](/installation) for system requirements and step-by-step instructions for Windows, macOS, and Linux.
+    </Note>
+  </Step>
+
+  <Step title="Launch GVP Bridge">
+    Open the GVP Bridge desktop app. You will see the main workspace with the **Gallery** view in the center, an empty **GenerationMonitor** sidebar on the right, and a prompt bar at the bottom.
+
+    In the bottom-right corner of the window, you will see a connection status indicator showing **Launch** in a dimmed state — this means no browser session is active yet.
+  </Step>
+
+  <Step title="Start the Grok browser session">
+    Click the **Launch** indicator in the bottom-right corner of the app. GVP Bridge will open a dedicated Chromium browser window using the **GVPChrome** profile.
+
+    The status indicator changes from **Launch** to **Connecting** while the app establishes a Chrome DevTools Protocol connection to the new browser window.
+
+    <Note>
+      GVPChrome is a separate browser profile created and managed by GVP Bridge. Do not use your regular Chrome or Chromium browser — this dedicated profile keeps your Grok session isolated and lets the app intercept generation requests safely.
+    </Note>
+  </Step>
+
+  <Step title="Log into Grok in the browser">
+    In the GVPChrome window that just opened, navigate to [grok.com](https://grok.com) and sign in with your Grok account.
+
+    Once you are logged in and the page loads, GVP Bridge detects your session automatically. The status indicator in the desktop app updates to **Connected** and your account ID appears next to it. You do not need to enter your credentials anywhere inside GVP Bridge itself.
+
+    <Tip>
+      You only need to log in once. GVPChrome saves your session, so on future launches the browser will already be authenticated as long as your Grok session has not expired.
+    </Tip>
+  </Step>
+
+  <Step title="Sync your gallery and trigger a generation">
+    Back in the desktop app:
+
+    1. Click the **Sync** button (the refresh icon in the top navigation bar) to pull your recent Grok posts into the local gallery. Your images appear as cards in the masonry grid.
+    2. Type a prompt in the prompt bar at the bottom of the screen — for example, `cinematic slow zoom, golden hour light`.
+    3. Make sure the mode selector shows **Video** (the default). To switch to image editing instead, click the **Image** button in the mode selector.
+    4. Hover over any gallery card. A **Fire** button appears as an overlay icon. Click it.
+
+    GVP Bridge arms itself with your prompt, triggers Grok's generation pipeline inside GVPChrome, intercepts and modifies the outgoing request, and begins streaming the response.
+
+    Watch the **GenerationMonitor** sidebar on the right — a circular progress ring appears and fills as the generation advances. When it reaches 100 %, the ring becomes a playback indicator and a preview thumbnail loads on hover.
+
+    <Warning>
+      Keep the GVPChrome browser window open throughout the generation. Closing it interrupts the live session and will cause the generation to fail.
+    </Warning>
+  </Step>
+</Steps>
+
+## What happens next
+
+Once your first generation completes, the result is stored in your local gallery and the video URL is available from the completed indicator in the GenerationMonitor. You can trigger additional generations from any other gallery card without waiting — GVP Bridge handles up to five concurrent streams at once.
+
+<CardGroup cols={2}>
+  <Card title="Video generation guide" icon="video" href="/guides/video-generation">
+    Learn how to write effective prompts and configure resolution, aspect ratio, and video length.
+  </Card>
+  <Card title="Image editing guide" icon="image" href="/guides/image-editing">
+    Use the image-edit mode to transform existing gallery images with a text prompt.
+  </Card>
+</CardGroup>

@@ -1,0 +1,59 @@
+---
+title: 'GVP Bridge: AI-Powered Video and Image Generation App'
+description: 'GVP Bridge is a desktop app that automates AI video and image generation on Grok — trigger generations from your gallery with a single click.'
+---
+
+GVP Bridge is a desktop app that lets you generate AI videos and edited images from your Grok gallery without manually navigating Grok's interface. You select an image, choose a prompt, and click **Fire** — the app handles everything else. It connects to a dedicated browser session behind the scenes, drives Grok's generation pipeline automatically, and streams real-time progress back to the app while you keep working.
+
+## What you can do
+
+<Columns cols={2}>
+  <Card title="Video generation" icon="video">
+    Turn any image in your gallery into an AI-generated video. Enter a prompt, pick an image card, and let GVP Bridge trigger and monitor the generation automatically.
+  </Card>
+  <Card title="Image editing" icon="image">
+    Use Grok's image-edit model to transform an existing image with a text prompt. Switch the mode selector to **Image** before clicking **Fire**.
+  </Card>
+  <Card title="Multi-reference" icon="layers">
+    Feed multiple gallery images into a single generation request. GVP Bridge composes the correct payload with all referenced assets automatically.
+  </Card>
+  <Card title="Gallery sync" icon="refresh-cw">
+    Pull your latest Grok posts into the app's local gallery with one click. Your gallery stays filtered to your active account and updates the moment you switch accounts in the browser.
+  </Card>
+</Columns>
+
+## How the two-part system works
+
+GVP Bridge is split into two cooperating parts that run together whenever you use the app.
+
+<CardGroup cols={2}>
+  <Card title="The Brain — desktop app" icon="cpu">
+    The window you interact with. It stores your gallery in a local database, manages active generation streams, tracks real-time progress, and issues every command to the browser. All logic lives here.
+  </Card>
+  <Card title="The Bridge — GVPChrome browser" icon="chrome">
+    A dedicated Chromium profile called **GVPChrome** that runs quietly in the background. It stays logged into Grok, and the desktop app drives it remotely. You log in once; GVP Bridge takes it from there.
+  </Card>
+</CardGroup>
+
+When you click **Fire**, the app arms itself with your prompt and settings, triggers Grok's native generation flow inside GVPChrome, intercepts the outgoing request, and replaces the payload with your configuration — all before the request reaches Grok's servers. The generation response streams back as live progress data that you can watch in the **GenerationMonitor** sidebar.
+
+## Real-time progress tracking
+
+The **GenerationMonitor** in the right sidebar shows up to five concurrent generations at once. Each entry displays a circular progress ring that fills as the generation advances. When a generation finishes, the ring becomes a playback indicator and a thumbnail preview appears on hover. If Grok flags a generation for moderation, the indicator switches to an error state immediately.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Download GVP Bridge, install it on your system, and complete first-run setup.
+  </Card>
+  <Card title="Quick start" icon="rocket" href="/quickstart">
+    Go from zero to your first generated video in five steps.
+  </Card>
+  <Card title="Video generation guide" icon="video" href="/guides/video-generation">
+    Learn how to craft effective prompts and use generation settings.
+  </Card>
+  <Card title="Core concepts" icon="layers" href="/concepts/architecture">
+    Understand how the desktop app and browser bridge work together.
+  </Card>
+</CardGroup>

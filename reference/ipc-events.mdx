@@ -1,0 +1,150 @@
+---
+title: "GVP Bridge Real-Time Event Bus: Complete Reference"
+description: "Complete reference for all events emitted by GVP Bridge to the frontend, including payload shapes, field types, and TypeScript subscription examples."
+---
+
+GVP Bridge emits real-time events to the frontend as generations run, streams complete, and account sessions change. You subscribe to these events using the typed helper functions available in the app's IPC module. Each subscription returns a `Promise<UnlistenFn>` — call the returned function to clean up the listener when your component unmounts.
+
+---
+
+## `grok_generation_progress`
+
+Fired repeatedly during an active generation as the backend receives NDJSON chunks from the Grok API. Each emission carries the latest progress percentage, moderation status, and — once available — media URLs for the in-progress result.
+
+<ResponseField name="streamId" type="string" required>
+  Unique identifier for this generation stream. Combines a timestamp with entropy to guarantee uniqueness across concurrent generations.
+</ResponseField>
+
+<ResponseField name="progress" type="number" required>
+  Generation progress as an integer from `0` to `100`. A value of `100` combined with `moderated: false` and a present `mediaUrl` indicates successful completion.
+</ResponseField>
+
+<ResponseField name="moderated" type="boolean" required>
+  Set to `true` when Grok's safety filter has blocked the generation. A moderated stream is considered terminal — no `mediaUrl` will appear. Note: the field key is `moderated`, not `isModerated`.
+</ResponseField>
+
+<ResponseField name="genType" type="string" required>
+  The generation archetype that produced this stream. One of `"video"`, `"image_edit"`, `"multi_ref_video"`, `"multi_ref_image_edit"`, or `"video_extend"`.
+</ResponseField>
+
+<ResponseField name="promptEcho" type="string" required>
+  The original prompt echoed back from the stream response. Useful for associating progress events with the user-supplied prompt when multiple generations run concurrently.
+</ResponseField>
+
+<ResponseField name="mediaUrl" type="string">
+  The CDN URL of the generated video or edited image. Present only once the generation reaches a sufficient progress level; absent on early progress ticks.
+</ResponseField>
+
+<ResponseField name="thumbnailUrl" type="string">
+  A lower-resolution thumbnail URL. Typically available before `mediaUrl` and suitable for preview display during generation.
+</ResponseField>
+
+```typescript
+import { onGenerationProgress } from "../ipc/events";
+
+const unlisten = await onGenerationProgress((payload) => {
+  console.log(`[${payload.streamId}] ${payload.progress}% — ${payload.genType}`);
+
+  if (payload.moderated) {
+    console.warn("Generation was moderated:", payload.promptEcho);
+    return;
+  }
+
+  if (payload.mediaUrl) {
+    console.log("Media ready:", payload.mediaUrl);
+  }
+});
+
+// Later, to clean up:
+unlisten();
+```
+
+---
+
+## `grok_stream_complete`
+
+Fired once when the backend determines that a stream has fully ended. This event is emitted when the backend reads a `[DONE]` sentinel in the NDJSON stream or detects a `stream_end` meta-event on reader close. The streams store uses this event to set the `done` flag and trigger a gallery refresh.
+
+<ResponseField name="stream_id" type="string" required>
+  The identifier of the stream that has completed. Matches the `streamId` field in earlier `grok_generation_progress` events for the same generation.
+</ResponseField>
+
+```typescript
+import { onStreamComplete } from "../ipc/events";
+
+const unlisten = await onStreamComplete((payload) => {
+  console.log("Stream finished:", payload.stream_id);
+});
+```
+
+---
+
+## `grok_login_status`
+
+Fired whenever the backend detects a change in the authenticated Grok account — either because golden headers were harvested from a new session or because the account is no longer detectable.
+
+<ResponseField name="logged_in" type="boolean" required>
+  `true` when a valid authenticated session has been detected in the intercepted headers. `false` when the session is absent or stale.
+</ResponseField>
+
+<ResponseField name="uuid" type="string | null" required>
+  The account UUID harvested from the network headers. `null` when `logged_in` is `false`. This UUID is used to construct asset URLs in the format `https://assets.grok.com/users/{uuid}/{image_uuid}/content`.
+</ResponseField>
+
+```typescript
+import { onGrokLoginStatus } from "../ipc/events";
+
+const unlisten = await onGrokLoginStatus((payload) => {
+  if (payload.logged_in && payload.uuid) {
+    console.log("Account active:", payload.uuid);
+  } else {
+    console.warn("No active Grok session");
+  }
+});
+```
+
+---
+
+## `gallery-updated`
+
+Fired after the backend has completed a gallery sync. This event carries no payload fields — it is a pure signal that the frontend should re-fetch gallery data. The streams store listens for `grok_stream_complete` and then calls `fetchGallery()`, which eventually triggers this event.
+
+```typescript
+import { onGalleryUpdated } from "../ipc/events";
+
+const unlisten = await onGalleryUpdated(() => {
+  console.log("Gallery data refreshed");
+  // Re-query your gallery store here
+});
+```
+
+---
+
+## `new_media_generated`
+
+Fired when the backend has persisted a new piece of generated media to the local database. This event is distinct from `grok_generation_progress` — it represents the final committed record, not an in-flight update.
+
+<ResponseField name="media_type" type='"video" | "edited_image"' required>
+  Indicates whether the generated asset is a video or an edited image.
+</ResponseField>
+
+<ResponseField name="id" type="string" required>
+  The database record ID for the new media entry.
+</ResponseField>
+
+<ResponseField name="post_id" type="string" required>
+  The Grok post ID associated with this media. Corresponds to the `parentPostId` used in the generation payload.
+</ResponseField>
+
+<ResponseField name="url" type="string" required>
+  The CDN URL for the generated asset. This is the permanent URL stored in the database, equivalent to `mediaUrl` in the final `grok_generation_progress` event.
+</ResponseField>
+
+```typescript
+import { onNewMediaGenerated } from "../ipc/events";
+
+const unlisten = await onNewMediaGenerated((payload) => {
+  console.log(`New ${payload.media_type} saved:`, payload.url);
+  console.log("Post ID:", payload.post_id);
+});
+```

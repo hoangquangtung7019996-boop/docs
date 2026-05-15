@@ -1,0 +1,61 @@
+---
+title: 'Generate AI Videos from Gallery Images in GVP Bridge'
+description: 'Turn any synced image into an AI-generated video — connect GVPChrome, pick an image, write a prompt, and click Fire to start the generation.'
+---
+
+GVP Bridge automates video generation on Grok by intercepting and replacing the native request with your custom prompt and settings — you never touch Grok's UI directly. All you need is a connected browser, an image in your gallery, and a prompt.
+
+## Prerequisites
+
+- Chrome or Chromium is installed on your system — GVP Bridge uses it to run the dedicated GVPChrome browser profile.
+- You have at least one image synced to your gallery. See [Gallery Sync](/guides/gallery-sync) if your gallery is empty.
+
+## Generate a video
+
+<Steps>
+  <Step title="Connect your browser">
+    Click the **Play** button in the GVP Bridge toolbar. The app launches the GVPChrome browser, connects to it, and reads your active Grok account. The status indicator turns green when the connection is ready.
+  </Step>
+  <Step title="Select an image">
+    Browse your gallery and click the image you want to animate. The image UUID is captured automatically — you do not need to copy or paste it.
+  </Step>
+  <Step title="Write your prompt">
+    Type your generation prompt in the **Prompt** field. Describe the motion, style, or scene you want. Leave the field empty to let Grok decide.
+  </Step>
+  <Step title="Set generation options">
+    Adjust the options below the prompt field as needed:
+
+    | Option | Default | Examples |
+    |--------|---------|---------|
+    | Aspect ratio | `2:3` | `16:9`, `1:1`, `2:3` |
+    | Video length | `6` seconds | Any whole-second value |
+    | Resolution | `480p` | `480p`, `720p` |
+
+  </Step>
+  <Step title="Click Fire">
+    Click the **Fire** button. GVP Bridge arms the interception layer, triggers Grok's native video-generation flow automatically (the Ambush), swaps in your payload, and starts streaming the response.
+  </Step>
+  <Step title="Watch the GenerationMonitor">
+    The **GenerationMonitor** sidebar opens and shows live progress. Generation typically takes 30–90 seconds. The progress bar advances as the NDJSON stream delivers updates.
+  </Step>
+  <Step title="Find your video in the gallery">
+    When progress reaches 100 % and no moderation flag is raised, the video is saved to your local database. Refresh your gallery view — the new video appears linked to the source image.
+  </Step>
+</Steps>
+
+<Note>
+  **How the Ambush works.** You never click a button inside Grok's UI. GVP Bridge injects a script that finds and fires Grok's native "Make video" button programmatically. This forces Grok to open its internal `/new` request, which the app then intercepts and replaces with your payload. The whole handshake is invisible to you.
+</Note>
+
+## What happens if generation is blocked?
+
+If your prompt or image violates Grok's content policy, the monitor transitions to a **blocked** state immediately. No video is saved. Revise your prompt and click Fire again.
+
+<Warning>
+  Changing the aspect ratio after selecting an image has no effect on the source image — it only affects the output video dimensions.
+</Warning>
+
+## Next steps
+
+- [Extend a generated video](/guides/video-extension) to make it longer.
+- [Use multiple images as references](/guides/multi-reference) for more stylistic control.

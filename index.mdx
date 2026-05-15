@@ -1,0 +1,80 @@
+---
+title: "GVP Bridge: Automate AI Video and Image Generation"
+description: "GVP Bridge is a desktop app that automates AI video and image generation on Grok. Connect once, then generate from any image with a single click."
+mode: custom
+---
+
+<div className="mx-auto flex w-full max-w-[720px] flex-col gap-12 px-4 py-10 lg:gap-14 lg:py-16">
+  <div className="flex flex-col items-center gap-6">
+    <div className="flex max-w-[480px] flex-col gap-2 text-center">
+      <h1 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-50">
+        Welcome to GVP Bridge
+      </h1>
+      <p className="text-balance text-base text-gray-600 dark:text-gray-400">
+        Generate videos and edited images from your Grok gallery with a single click. Use the tabs above to navigate the docs or search with <kbd>⌘</kbd> <kbd>K</kbd>.
+      </p>
+    </div>
+  </div>
+
+  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+    <a
+      href="/quickstart"
+      className="group flex flex-col outline-none"
+    >
+      <div
+        className="kb-feature-card relative flex h-[170px] items-center justify-center overflow-hidden rounded-2xl ring-1 ring-gray-100 transition group-hover:ring-gray-200 dark:ring-white/[0.08] dark:group-hover:ring-white/15 saturate-50 group-hover:saturate-100"
+      >
+        <div className="relative flex items-center justify-center">
+          <Icon icon="rocket" size={36} className="!bg-white" />
+        </div>
+      </div>
+      <div className="flex flex-col gap-1 pt-4">
+        <span className="text-base font-medium text-gray-900 dark:text-gray-50">Quick start</span>
+        <span className="text-sm leading-5 text-gray-600 dark:text-gray-400">
+          Install GVP Bridge, connect to Grok, and trigger your first AI video generation in minutes.
+        </span>
+      </div>
+    </a>
+
+    <a
+      href="/guides/video-generation"
+      className="group flex flex-col outline-none"
+    >
+      <div
+        className="kb-feature-card relative flex h-[170px] items-center justify-center overflow-hidden rounded-2xl ring-1 ring-gray-100 transition group-hover:ring-gray-200 dark:ring-white/[0.08] dark:group-hover:ring-white/15 saturate-50 group-hover:saturate-100"
+      >
+        <div className="relative flex items-center justify-center">
+          <Icon icon="video" size={36} className="!bg-white" />
+        </div>
+      </div>
+      <div className="flex flex-col gap-1 pt-4">
+        <span className="text-base font-medium text-gray-900 dark:text-gray-50">Video generation</span>
+        <span className="text-sm leading-5 text-gray-600 dark:text-gray-400">
+          Turn any image in your gallery into an AI-generated video with a custom prompt.
+        </span>
+      </div>
+    </a>
+  </div>
+
+  <div className="flex flex-col gap-4">
+    <h2 className="text-lg font-medium tracking-tight text-gray-900 dark:text-gray-50">Explore the docs</h2>
+
+    <Columns cols={2}>
+      <Card title="Core Concepts" icon="layers" iconType="light" href="/concepts/architecture">
+        Understand how the desktop app, browser bridge, and generation pipeline work together.
+      </Card>
+      <Card title="Generation Guides" icon="sparkles" iconType="light" href="/guides/video-generation">
+        Step-by-step walkthroughs for video, image editing, multi-reference, and video extension.
+      </Card>
+    </Columns>
+
+    <Columns cols={2}>
+      <Card title="Configuration" icon="settings" iconType="light" href="/configuration/settings">
+        Customize generation options, resolution, aspect ratio, and video length defaults.
+      </Card>
+      <Card title="Reference" icon="code-xml" iconType="light" href="/reference/ipc-events">
+        IPC event payloads, generation type schemas, and stream response structures.
+      </Card>
+    </Columns>
+  </div>
+</div>

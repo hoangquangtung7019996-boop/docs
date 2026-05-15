@@ -1,0 +1,62 @@
+---
+title: 'Sync Your Existing Grok Media Library to GVP Bridge'
+description: 'Import your existing Grok images and videos into GVP Bridge so you can use them as generation sources — already-imported posts are skipped automatically.'
+---
+
+Before you can generate videos or edit images, GVP Bridge needs a local copy of your Grok media library. Gallery sync fetches your existing posts from Grok and stores them in a local SQLite database. After the initial sync you can run it again at any time to pull in new content — already-imported posts are skipped automatically, so incremental syncs are fast.
+
+## What gets synced
+
+Each sync pass retrieves up to **10 pages of 40 posts each** (400 posts maximum per sync run). Within each page, GVP Bridge imports:
+
+- **Root posts** — original images you have uploaded or generated.
+- **Child videos** — videos generated from a root image.
+- **Edited images** — variants produced by image-edit generations.
+
+Only content belonging to your active Grok account is stored locally. GVP Bridge applies an account ID filter so posts from other users that may appear in shared contexts are excluded.
+
+## Run a gallery sync
+
+<Steps>
+  <Step title="Connect your browser">
+    Click **Play** in the GVP Bridge toolbar and wait for the green status indicator. Sync requires an active browser connection because it reads your Grok session to authenticate the requests.
+  </Step>
+  <Step title="Click the Sync button">
+    Click the **Sync** button (the circular arrow icon) in the gallery toolbar. GVP Bridge begins fetching pages from the Grok API immediately.
+  </Step>
+  <Step title="Wait for sync to complete">
+    A progress indicator shows how many pages have been processed. Sync typically finishes in under 30 seconds for a library of a few hundred posts. Large libraries may take longer.
+  </Step>
+  <Step title="Browse your gallery">
+    Once sync finishes, the gallery view refreshes automatically. Your images and videos appear grouped by source image, with child videos nested under their parent.
+  </Step>
+</Steps>
+
+<Note>
+  **Incremental sync is automatic.** GVP Bridge checks each incoming post against the local database before writing. Posts that already exist are skipped (sentinel check). You will not end up with duplicates if you sync repeatedly.
+</Note>
+
+## Re-syncing and keeping up to date
+
+There is no automatic background sync — you trigger it manually. Run a sync whenever you:
+
+- Upload new images directly in Grok's web UI.
+- Complete a generation session and want to pull in results created outside GVP Bridge.
+- Start a new GVP Bridge session on a different machine with an empty local database.
+
+<Tip>
+  Sync before starting a generation session to make sure all your latest images are available as sources. A stale gallery means you may not see images uploaded after the last sync.
+</Tip>
+
+## Account filtering
+
+GVP Bridge reads the active account ID from your connected browser session at startup. The gallery only shows posts that match this account ID. If you switch Grok accounts in the browser, disconnect and reconnect GVP Bridge so it picks up the new account before syncing.
+
+<Warning>
+  Syncing while logged into the wrong Grok account imports that account's media into your local database. Disconnect, clear the local database, and re-sync after switching accounts if this happens.
+</Warning>
+
+## Next steps
+
+- [Generate a video from a synced image](/guides/video-generation).
+- [Edit a synced image with AI](/guides/image-editing).

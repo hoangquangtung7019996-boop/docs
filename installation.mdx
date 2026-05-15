@@ -1,0 +1,75 @@
+---
+title: 'Install GVP Bridge: Windows, macOS, and Linux Setup'
+description: 'Download and install the GVP Bridge desktop app, review system requirements, and complete first-run setup including the GVPChrome browser profile.'
+---
+
+GVP Bridge is a native desktop application built with Tauri. It runs on Windows, macOS, and Linux, and it ships as a standard installer for each platform. Installation takes only a few minutes — the app sets up its browser profile automatically on first launch.
+
+## System requirements
+
+Before installing, confirm your system meets the following requirements.
+
+| Requirement | Details |
+|---|---|
+| Operating system | Windows 10 or later, macOS 12 or later, or a modern Linux distribution |
+| Chromium or Chrome | Required for the GVPChrome browser profile — see note below |
+| Disk space | At least 200 MB for the app; additional space for your local gallery database |
+| Internet connection | Required to connect to Grok and stream generation responses |
+
+<Note>
+  GVP Bridge launches a dedicated browser profile called **GVPChrome** using your system's Chromium or Chrome installation. Make sure Chrome or Chromium is installed on your system before you run GVP Bridge for the first time. The app does not bundle a browser.
+</Note>
+
+## Download GVP Bridge
+
+Go to the GVP Bridge releases page and download the installer for your operating system:
+
+- **Windows** — download the `.msi` installer
+- **macOS** — download the `.dmg` disk image
+- **Linux** — download the `.AppImage` or the `.deb` package for Debian-based distributions
+
+<Tip>
+  Always download from the official releases page to ensure you have the latest version with current security fixes.
+</Tip>
+
+## Install the app
+
+<Steps>
+  <Step title="Run the installer">
+    Open the file you downloaded and follow the on-screen prompts.
+
+    - **Windows**: Double-click the `.msi` file and step through the setup wizard. Accept the default install location unless you have a specific reason to change it.
+    - **macOS**: Open the `.dmg` file, drag **GVP Bridge** into your **Applications** folder, then eject the disk image.
+    - **Linux (AppImage)**: Mark the file executable (`chmod +x GVP-Bridge.AppImage`) and run it directly. No installation step is required.
+    - **Linux (.deb)**: Install with `sudo dpkg -i gvp-bridge.deb` or open it with your package manager.
+  </Step>
+
+  <Step title="Launch GVP Bridge for the first time">
+    Open GVP Bridge from your Applications folder, Start menu, or launcher. The app window opens to the **Gallery** view with an empty workspace.
+
+    On first launch, GVP Bridge creates the local SQLite database it uses to store your gallery. This happens automatically — no configuration is needed.
+  </Step>
+
+  <Step title="Understand the GVPChrome browser profile">
+    When you click **Launch** in the app for the first time, GVP Bridge creates a separate Chromium browser profile named **GVPChrome**. This profile is stored in your user data directory alongside your normal browser profiles, but it is completely isolated from them.
+
+    <Note>
+      Always use the GVPChrome browser that GVP Bridge opens — not your regular Chrome or Chromium window. Using a different browser window will not work because the app controls GVPChrome via Chrome DevTools Protocol. Your regular browsing sessions are never affected.
+    </Note>
+
+    Log into Grok inside GVPChrome when it opens. GVP Bridge detects your session and reads your authentication credentials automatically from the live browser traffic — you never enter credentials inside the desktop app itself.
+  </Step>
+</Steps>
+
+## After installation
+
+Once GVP Bridge is installed and you have logged into Grok in GVPChrome, you are ready to sync your gallery and start generating. See the [quick start guide](/quickstart) for a walkthrough of your first generation.
+
+<CardGroup cols={2}>
+  <Card title="Quick start" icon="rocket" href="/quickstart">
+    Go from a fresh install to your first generated video in five steps.
+  </Card>
+  <Card title="Troubleshooting" icon="triangle-alert" href="/troubleshooting/common-issues">
+    Fix common issues with browser connection, gallery sync, and generation errors.
+  </Card>
+</CardGroup>

@@ -1,0 +1,79 @@
+---
+title: 'GVP Bridge Gallery: Storage, Sync, and Gallery Cards'
+description: 'Learn how GVP Bridge stores generated media locally, isolates content by Grok account, syncs your library, and refreshes automatically after each generation.'
+---
+
+GVP Bridge maintains a local gallery on your machine — a SQLite database that stores every piece of media you generate through the app. This means your history is available instantly without loading Grok in a browser, and it persists across sessions. The gallery is the central hub you interact with to browse past work and trigger new generations from existing content.
+
+## What the gallery stores
+
+Your gallery holds three types of content:
+
+<CardGroup cols={3}>
+  <Card title="Posts" icon="image">
+    Source image posts from your Grok account, used as the starting point for video and image-edit generations.
+  </Card>
+  <Card title="Videos" icon="video">
+    Generated videos produced by GVP Bridge, linked back to the source post they were generated from.
+  </Card>
+  <Card title="Edited images" icon="pencil">
+    Images produced through the Image Edit archetypes, stored alongside the original source.
+  </Card>
+</CardGroup>
+
+All records are stored locally on your device. GVP Bridge does not upload your gallery data anywhere.
+
+## Account isolation
+
+The gallery always reflects the **currently active Grok account** — the account detected from GVPChrome's live session. When GVP Bridge detects that you have switched accounts in the browser, the gallery view refreshes immediately and shows only content belonging to the new account.
+
+<Note>
+  If you use multiple Grok accounts, the gallery content for each account is stored separately. Switching accounts in GVPChrome automatically switches the gallery context in the desktop app. No manual action is required.
+</Note>
+
+This isolation is enforced at the query level: every gallery read filters by the active account's ID, so there is no risk of accidentally generating against content from a different account.
+
+## Syncing your existing Grok library
+
+When you first set up GVP Bridge, your local gallery is empty. You can populate it with your existing Grok media library using the **Gallery Sync** feature.
+
+<Steps>
+  <Step title="Open the sync panel">
+    Navigate to the gallery section in the desktop app and click the **Sync** button. Make sure GVPChrome is open and logged into the correct Grok account.
+  </Step>
+  <Step title="GVP Bridge pulls your library">
+    The app fetches your existing posts and associated media from Grok using your live authenticated session. Records are written into the local database — existing entries are not duplicated.
+  </Step>
+  <Step title="Your gallery populates">
+    Once the sync completes, all your existing Grok media appears as gallery cards, ready to use as generation sources.
+  </Step>
+</Steps>
+
+<Tip>
+  Run a sync whenever you have added new source images or content directly through the Grok web interface that you want to use as generation inputs in GVP Bridge.
+</Tip>
+
+## The GalleryCard: your main interaction point
+
+Each item in your gallery is displayed as a **GalleryCard**. This is where you initiate new generations against an existing post. Each card exposes two actions:
+
+<AccordionGroup>
+  <Accordion title="Fire">
+    Triggers a generation with a **payload mutation**. The app takes the existing post type and transforms it into a different generation archetype before triggering — for example, treating an image post as the source for a Video Extension or Image Edit. Use Fire when you want to apply a different generation type than the post's default.
+  </Accordion>
+  <Accordion title="InstaGen">
+    Triggers a generation **directly**, without mutation. The app uses the post's existing type and your current prompt settings to generate immediately. Use InstaGen for the fastest path to output when you want a straightforward generation against the existing post type.
+  </Accordion>
+</AccordionGroup>
+
+Both actions use the prompt and settings currently configured in the desktop app at the time you click. Make sure your prompt is set before triggering.
+
+## Automatic gallery refresh
+
+You do not need to manually refresh the gallery after a generation completes. When the generation pipeline reaches a terminal state — either a successful `[DONE]` signal or a `stream_end` fallback — the app writes the result to the local database and the gallery view updates automatically.
+
+<Info>
+  Moderated generations do not produce a gallery entry. If a generation is blocked by Grok's content policy, no record is added and the gallery remains unchanged.
+</Info>
+
+The automatic refresh means the gallery always reflects the current state of your local database without any manual intervention on your part.

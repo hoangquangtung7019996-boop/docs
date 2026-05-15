@@ -1,0 +1,54 @@
+---
+title: 'How to Edit Gallery Images with AI Using GVP Bridge'
+description: 'Apply AI-powered edits to any gallery image and receive two variants at once, streamed live through the GenerationMonitor sidebar as they complete.'
+---
+
+GVP Bridge's image-editing mode sends your prompt and a reference image to Grok's `imagine-image-edit` model. Every edit request always returns two variants so you can pick the best result. The workflow mirrors video generation: connect, select, prompt, fire.
+
+## Prerequisites
+
+- Your browser is connected (green status indicator). See [Generate a video](/guides/video-generation) for connection steps.
+- The image you want to edit is present in your gallery. Run a [gallery sync](/guides/gallery-sync) first if needed.
+
+## Edit an image
+
+<Steps>
+  <Step title="Connect your browser">
+    Click the **Play** button if you haven't already. Wait for the status indicator to turn green before continuing.
+  </Step>
+  <Step title="Select the image to edit">
+    Click the target image in your gallery. GVP Bridge records its UUID and asset URL automatically.
+  </Step>
+  <Step title="Write an edit prompt">
+    Enter your edit instruction in the **Prompt** field. Be specific — describe exactly what you want changed (e.g., "change the background to a snowy forest" or "make the lighting golden hour").
+  </Step>
+  <Step title="Set the generation type to image edit">
+    Open the **Generation type** selector and choose **Image Edit**. This tells GVP Bridge to use the image editing model instead of the video generation model.
+  </Step>
+  <Step title="Click Fire">
+    Click **Fire**. GVP Bridge arms the interception, triggers the Ambush, and submits the payload. Image streaming begins almost immediately.
+  </Step>
+  <Step title="Watch two variants arrive">
+    The **GenerationMonitor** sidebar streams both edited images progressively. You will always receive exactly **two variants** per request. Each variant appears in the monitor as its stream completes.
+  </Step>
+  <Step title="Save or use a variant">
+    Once both variants finish streaming, they are saved to your local gallery. Click either variant to inspect it at full resolution or use it as a reference for a new generation.
+  </Step>
+</Steps>
+
+<Note>
+  You always receive two edited variants per request. This count is fixed and cannot be changed.
+</Note>
+
+## Moderation
+
+GVP Bridge monitors the response stream for a `moderated: true` signal. If Grok flags your request, the monitor switches to a **blocked** state before either image finishes generating. No partial images are saved.
+
+<Warning>
+  If a generation is blocked, both variants are discarded. Rewrite your prompt to remove content that may conflict with Grok's content policy, then click Fire again.
+</Warning>
+
+## Next steps
+
+- [Use multiple images as references](/guides/multi-reference) for style-guided image edits.
+- [Sync your gallery](/guides/gallery-sync) to bring in more source images.

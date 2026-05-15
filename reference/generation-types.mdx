@@ -1,0 +1,124 @@
+---
+title: "GVP Bridge Generation Types: Video, Edit, and More"
+description: "Reference for all five GVP Bridge generation types — video, image edit, multi-reference, and extension — with required fields, defaults, and output details."
+---
+
+GVP Bridge supports five distinct generation archetypes. When you trigger a generation, you select an archetype by setting the `gen_type` field in your payload. GVP Bridge maps each archetype to the correct Grok model and configuration automatically. The default archetype when `gen_type` is omitted is video generation from a single image.
+
+---
+
+## VanillaVideoGen
+
+**`gen_type`: `"video"`**
+
+Converts a single source image into a short video clip. The source image is supplied by UUID and referenced both as a file attachment and in the `videoGenModelConfig`. The backend constructs an asset URL from the active account UUID and the image UUID if no explicit `target_assets_url` is provided.
+
+**Required fields**
+
+| Field | Description |
+|---|---|
+| `image_uuid` | UUID of the source image to animate |
+| `message` | Prompt describing the desired motion or scene |
+
+**Optional fields**
+
+| Field | Default | Description |
+|---|---|---|
+| `video_length` | `6` | Duration in seconds |
+| `aspect_ratio` | `"2:3"` | Output aspect ratio |
+| `resolution` | `"480p"` | Output resolution |
+| `target_assets_url` | auto-resolved | Explicit CDN URL for the source image |
+
+**Output**: Video URL delivered via `grok_generation_progress` → `mediaUrl`
+
+---
+
+## MultiRefVideoGen
+
+**`gen_type`: `"multi_ref_video"`**
+
+Generates a video using multiple source images as visual references. Unlike `VanillaVideoGen`, the source images are passed as `imageReferences` inside `videoGenModelConfig` rather than as file attachments. The `isReferenceToVideo` flag is set to `true` in the API payload to activate multi-reference mode.
+
+**Required fields**
+
+| Field | Description |
+|---|---|
+| `image_uuid` | UUID of the primary (parent) image |
+| `image_references` | Array of additional image UUIDs to use as references |
+| `message` | Prompt describing the desired output |
+
+**Optional fields**
+
+| Field | Default | Description |
+|---|---|---|
+| `video_length` | `6` | Duration in seconds |
+| `aspect_ratio` | `"2:3"` | Output aspect ratio |
+| `resolution` | `"480p"` | Output resolution |
+
+**Output**: Video URL delivered via `grok_generation_progress` → `mediaUrl`
+
+---
+
+## VideoExtension
+
+**`gen_type`: `"video_extend"`**
+
+Extends an existing video from a specified start time, stitching the new segment onto the original. The source video is identified by its post UUID. The `extend_start_time` controls where in the existing video the extension begins — useful for generating seamlessly looping or continuing clips.
+
+**Required fields**
+
+| Field | Description |
+|---|---|
+| `image_uuid` | UUID of the source video post to extend |
+
+**Optional fields**
+
+| Field | Default | Description |
+|---|---|---|
+| `extend_start_time` | `10.041667` | Seconds offset from which to stitch the extension |
+| `video_length` | `6` | Duration of the new segment |
+| `aspect_ratio` | `"2:3"` | Output aspect ratio |
+| `resolution` | `"480p"` | Output resolution |
+
+**Output**: Video URL (stitched result) delivered via `grok_generation_progress` → `mediaUrl`
+
+---
+
+## VanillaImageEdit
+
+**`gen_type`: `"image_edit"`**
+
+Applies a text-directed edit to a single source image. The source image URL is resolved to an asset URL and placed in `imageEditModelConfig.imageReferences`. The model (`imagine-image-edit`) generates two candidate outputs by default (`imageGenerationCount: 2`), and results stream via `streamingImageGenerationResponse` chunks.
+
+**Required fields**
+
+| Field | Description |
+|---|---|
+| `image_uuid` | UUID of the source image to edit |
+| `message` | Instruction describing the desired edit |
+
+**Optional fields**
+
+| Field | Default | Description |
+|---|---|---|
+| `target_assets_url` | auto-resolved | Explicit CDN URL for the source image |
+
+**Output**: Edited image URL delivered via `grok_generation_progress` → `mediaUrl`
+
+---
+
+## MultiRefImageEdit
+
+**`gen_type`: `"multi_ref_image_edit"`**
+
+Edits an image using multiple reference images to guide style, composition, or content. The `image_references` array is passed directly into `imageEditModelConfig.imageReferences`. This archetype uses the same `imagine-image-edit` model as `VanillaImageEdit` but supplies the full reference array instead of a single resolved asset URL.
+
+**Required fields**
+
+| Field | Description |
+|---|---|
+| `image_uuid` | UUID of the primary (parent) image |
+| `image_references` | Array of additional image UUIDs to use as style/content references |
+| `message` | Instruction describing the desired edit |
+
+**Output**: Edited image URL delivered via `grok_generation_progress` → `mediaUrl`

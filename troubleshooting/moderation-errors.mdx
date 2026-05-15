@@ -1,0 +1,56 @@
+---
+title: "GVP Bridge Moderation Errors: How to Detect and Fix"
+description: "What content moderation means in GVP Bridge, how the app detects a blocked generation in real time, and how to revise your prompt to avoid policy violations."
+---
+
+When you submit a generation through GVP Bridge, Grok evaluates the request against its content policy before producing any output. If the request violates that policy, Grok marks the generation as moderated and stops processing it. GVP Bridge detects this state in real time and surfaces it immediately so you know why a generation did not complete.
+
+<Warning>
+  Content that violates [Grok's usage policy](https://x.ai/usage-policy) will be blocked regardless of how the request is submitted. GVP Bridge does not bypass or circumvent Grok's content moderation. Repeatedly submitting policy-violating prompts may result in restrictions on your Grok account.
+</Warning>
+
+## How moderation works in GVP Bridge
+
+GVP Bridge monitors the streaming response from Grok's API after a generation is submitted. The stream includes progress updates and metadata fields. When Grok blocks a generation, it emits a response containing `"moderated": true` in the stream data.
+
+The app's GenerationMonitor watches for this field and transitions the generation immediately into a blocked/error state when it is detected. No further processing occurs for that generation.
+
+### Terminal state logic
+
+GVP Bridge uses the following criteria to determine whether a generation has completed successfully or been blocked:
+
+| State | Conditions |
+|---|---|
+| **Success** | `progress` is `100`, `moderated` is `false`, and a `videoUrl` or `imageUrl` is present in the response |
+| **Blocked** | `moderated` is `true` at any point in the stream |
+
+<Note>
+  The field the app checks is `moderated`, not `isModerated`. GVP Bridge checks for both variants in the stream to ensure nothing is missed, but the canonical field name used by Grok's API is `moderated`.
+</Note>
+
+## What to do when a generation is blocked
+
+If GVP Bridge shows a blocked or moderation error state, the generation cannot be retried as-is. You need to modify your prompt.
+
+<Steps>
+  <Step title="Read the error state">
+    GVP Bridge will display a blocked indicator in the generation panel. This confirms the generation was rejected by Grok's content policy, not by a connection or technical error.
+  </Step>
+  <Step title="Revise your prompt">
+    Rewrite the prompt to remove any content that may conflict with Grok's usage policy. Common triggers include requests for graphic violence, explicit sexual content, depictions of real individuals in harmful contexts, and misinformation.
+  </Step>
+  <Step title="Review your reference assets">
+    For image edit and multi-reference generation types, the reference images are also evaluated. If the source asset itself contains policy-violating content, the generation may be blocked even with a neutral prompt.
+  </Step>
+  <Step title="Resubmit">
+    Once you have revised the prompt and verified your reference assets, click **Fire** again to submit the updated generation.
+  </Step>
+</Steps>
+
+## Moderation vs. other errors
+
+A moderated generation is distinct from other failure states:
+
+- **Moderation** — Grok evaluated your request and rejected it due to content policy. The `moderated: true` field is present in the stream. Fix: revise the prompt.
+- **No progress / stalled** — The Fetch interceptor may be in a bad state. Fix: refresh the Grok tab and retry. See [common issues](/troubleshooting/common-issues).
+- **No UUID / connection errors** — These are configuration or setup problems unrelated to content policy. See [common issues](/troubleshooting/common-issues).

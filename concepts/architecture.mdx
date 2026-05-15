@@ -1,0 +1,71 @@
+---
+title: 'GVP Bridge Architecture: Desktop App and GVPChrome'
+description: 'Understand the two-part system behind GVP Bridge — the desktop app that holds all logic and the GVPChrome browser it commands to generate media.'
+---
+
+GVP Bridge is built from two cooperating parts: a desktop application that holds all of your settings, logic, and media history, and a browser profile it controls silently in the background. You never need to touch the browser directly — the desktop app manages it for you. Understanding how these two parts interact will help you make sense of what happens when you hit the **Fire** button.
+
+## The two parts
+
+<CardGroup cols={2}>
+  <Card title="The Brain (Desktop App)" icon="cpu">
+    The desktop app you interact with. It stores your gallery in a local database, constructs generation payloads from your settings, manages active generation streams, and issues every command to the browser. All logic lives here.
+  </Card>
+  <Card title="The Bridge (Browser)" icon="chrome">
+    A dedicated Chromium browser profile called **GVPChrome**, running quietly in the background. It stays logged into Grok, and the desktop app drives it remotely using the Chrome DevTools Protocol (CDP). You never open or click inside this browser yourself.
+  </Card>
+</CardGroup>
+
+## What the desktop app manages
+
+The desktop app is the single source of truth for your session. It tracks:
+
+- **Your active Grok account** — harvested automatically from the browser's live traffic, so account switches are detected instantly.
+- **Your gallery** — a local SQLite database of all posts, videos, and edited images you have generated.
+- **Generation state** — which generations are running, their progress percentages, and the media URLs returned when they complete.
+- **Your prompt and settings** — aspect ratio, resolution, video length, generation type, and image references are all stored in the app and injected at generation time.
+
+<Info>
+  The desktop app picks up your active Grok account automatically by monitoring browser network traffic. You do not need to enter credentials anywhere in GVP Bridge.
+</Info>
+
+## How the browser bridge works
+
+When the desktop app launches GVPChrome, it immediately begins listening to the browser's network activity using CDP. This serves two purposes:
+
+1. **Session harvesting** — The app captures your authentication session and account ID from live Grok traffic. These are refreshed continuously so your session never goes stale.
+2. **Request interception** — The app registers a fetch interceptor on Grok's generation endpoints so it can pause, inspect, and replace outgoing requests before they reach Grok's servers.
+
+## The Ambush strategy
+
+The core technique that makes GVP Bridge work is called the **Ambush**. Rather than building requests from scratch — which would be blocked by Cloudflare and Grok's bot-detection — GVP Bridge lets Grok initiate a genuine request, then swaps the payload mid-flight.
+
+<Steps>
+  <Step title="The app arms itself">
+    When you configure a prompt and click **Fire** (or trigger **InstaGen**), the desktop app stores your settings as a pending payload and marks itself as "armed."
+  </Step>
+  <Step title="Grok's button is triggered">
+    The app injects a script into GVPChrome that finds Grok's native generation button and fires a real browser pointer event on it. Grok believes a human clicked, so it prepares and sends an authentic request.
+  </Step>
+  <Step title="The request is intercepted">
+    CDP catches the outgoing request the moment it leaves the browser. Because the app is armed, it pauses the request before it reaches the network.
+  </Step>
+  <Step title="The payload is swapped">
+    The app replaces the request body with your configured prompt, generation type, and settings. The original Grok payload is discarded.
+  </Step>
+  <Step title="The request continues">
+    The modified request is released. From Grok's server perspective, it looks like a perfectly normal request — because the authentication headers are real, originating from your live browser session.
+  </Step>
+</Steps>
+
+<Note>
+  The interceptor disarms itself immediately after one mutation. This prevents any risk of a loop where subsequent Grok requests are accidentally intercepted.
+</Note>
+
+## Why this design
+
+This approach means GVP Bridge inherits your real authenticated Grok session automatically, works without storing your password, and generates media through Grok's own infrastructure — including any models or quality tiers your account has access to.
+
+<Tip>
+  Keep GVPChrome open and logged into Grok while using the app. The desktop app depends on the live browser session to harvest headers and trigger generation events.
+</Tip>

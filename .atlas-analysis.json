@@ -1,0 +1,105 @@
+{
+  "projectType": "saas",
+  "projectName": "GVP Bridge",
+  "projectDescription": "A Tauri desktop application that automates AI video and image generation on Grok by intercepting and mutating browser requests via Chrome DevTools Protocol.",
+  "theme": "luma",
+  "primaryColor": "#7C3AED",
+  "lightColor": "#EDE9FE",
+  "darkColor": "#1E1B4B",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/architecture",
+              "concepts/generation-pipeline",
+              "concepts/gallery"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/video-generation",
+              "guides/image-editing",
+              "guides/multi-reference",
+              "guides/video-extension",
+              "guides/gallery-sync"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/settings",
+              "configuration/generation-options"
+            ]
+          },
+          {
+            "group": "Troubleshooting",
+            "pages": [
+              "troubleshooting/common-issues",
+              "troubleshooting/moderation-errors"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "groups": [
+          {
+            "group": "IPC Events",
+            "pages": [
+              "reference/ipc-events",
+              "reference/generation-types"
+            ]
+          },
+          {
+            "group": "Payload Schemas",
+            "pages": [
+              "reference/payload-schemas",
+              "reference/stream-responses"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Automated video generation from images using Grok AI",
+    "Image editing with single or multiple reference images",
+    "Video extension to seamlessly lengthen existing clips",
+    "Real-time NDJSON stream monitoring with live progress updates",
+    "CDP-powered browser automation for seamless Grok integration",
+    "Local SQLite gallery to store and manage all generated media",
+    "Multi-account support with automatic session harvesting",
+    "Gallery sync from Grok's media library"
+  ],
+  "publicApiSurface": [
+    "launchGrokBrowser() — launch Chrome and connect CDP",
+    "triggerFire(payload) — arm interceptor and trigger generation",
+    "triggerInstaGen(payload) — instant generation shortcut",
+    "triggerFastgen(payload) — fast generation alias",
+    "getStatus() — current connection status",
+    "getActiveAccount() — active Grok account ID",
+    "setArmed(armed, prompt, target_uuid) — manually arm/disarm interceptor",
+    "syncGalleryFromListApi() — sync gallery from Grok media API",
+    "getUvhTree() — retrieve gallery tree for active account",
+    "getGenerationHistory() — past generations from local DB",
+    "getGenerationStats() — aggregate generation statistics",
+    "onGenerationProgress(cb) — subscribe to live generation progress events",
+    "onStreamComplete(cb) — subscribe to stream completion events",
+    "onGrokLoginStatus(cb) — subscribe to account login state changes",
+    "onGalleryUpdated(cb) — subscribe to gallery refresh signals",
+    "GenerationType: VanillaVideoGen | MultiRefVideoGen | VideoExtension | VanillaImageEdit | MultiRefImageEdit"
+  ]
+}

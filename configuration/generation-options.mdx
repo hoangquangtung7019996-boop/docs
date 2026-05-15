@@ -1,0 +1,153 @@
+---
+title: "Generation Options: Aspect Ratio, Resolution & More"
+description: "Reference for all GVP Bridge generation options — type, aspect ratio, video length, resolution, and extension timing — with defaults and payload examples."
+---
+
+Every time you trigger a generation in GVP Bridge, the app constructs a precise JSON payload and submits it to Grok's API. Understanding the available options lets you control the output format, quality, and behavior for each generation type. All options are configured in the generation panel before you click **Fire**.
+
+## Generation options
+
+### `gen_type` — Generation type
+
+Controls the generation mode. Each type produces a different kind of output and has different required inputs.
+
+| Value | Description |
+|---|---|
+| `video` | **(Default)** Generates a video from a single reference image. |
+| `image_edit` | Edits a single reference image using a text prompt. Returns two edited variants. |
+| `multi_ref_video` | Generates a video using multiple reference images as visual references. |
+| `multi_ref_image_edit` | Edits an image using multiple reference images as context. |
+| `video_extend` | Extends an existing video from a specified start time. Requires `extend_start_time`. |
+
+<Note>
+  For `multi_ref_video` and `multi_ref_image_edit`, you must select multiple images from the gallery before clicking Fire. The app includes their UUIDs automatically in the generation request.
+</Note>
+
+---
+
+### `aspect_ratio` — Output aspect ratio
+
+Controls the aspect ratio of the generated video or image.
+
+- **Type:** string
+- **Default:** `"2:3"`
+- **Examples:** `"2:3"`, `"16:9"`, `"1:1"`, `"9:16"`, `"4:3"`
+
+The value controls the dimensions of the generated output.
+
+---
+
+### `video_length` — Video duration
+
+Controls the length of the generated video in seconds.
+
+- **Type:** integer (seconds)
+- **Default:** `6`
+
+Applicable only to video generation types (`video`, `multi_ref_video`, `video_extend`). Has no effect on image edit generations.
+
+---
+
+### `resolution` — Output resolution
+
+Controls the resolution of the generated output.
+
+- **Type:** string
+- **Default:** `"480p"`
+- **Options:** `"480p"`, `"720p"`
+
+Higher resolution may increase generation time.
+
+---
+
+### `extend_start_time` — Video extension start time
+
+Specifies the timestamp (in seconds) at which GVP Bridge stitches the extended clip onto the source video. Only used when `gen_type` is `video_extend`.
+
+- **Type:** float (seconds)
+- **Default:** `10.041667`
+
+When `video_extend` is selected, GVP Bridge stitches the new segment onto the original video automatically starting from this offset.
+
+---
+
+## Payload examples
+
+The following examples show the model configuration block that GVP Bridge constructs for each generation type.
+
+<AccordionGroup>
+  <Accordion title="video — Single reference video">
+    ```json
+    {
+      "videoGenModelConfig": {
+        "parentPostId": "<image-uuid>",
+        "aspectRatio": "2:3",
+        "videoLength": 6,
+        "isVideoEdit": false,
+        "resolutionName": "480p"
+      }
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="multi_ref_video — Multi-reference video">
+    ```json
+    {
+      "videoGenModelConfig": {
+        "parentPostId": "<primary-uuid>",
+        "aspectRatio": "2:3",
+        "videoLength": 6,
+        "isVideoEdit": false,
+        "resolutionName": "480p",
+        "isReferenceToVideo": true,
+        "imageReferences": ["<uuid-1>", "<uuid-2>"]
+      }
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="video_extend — Video extension">
+    ```json
+    {
+      "videoGenModelConfig": {
+        "isVideoExtension": true,
+        "videoExtensionStartTime": 10.041667,
+        "extendPostId": "<video-uuid>",
+        "stitchWithExtendPostId": true,
+        "originalPostId": "<video-uuid>",
+        "originalRefType": "ORIGINAL_REF_TYPE_VIDEO_EXTENSION",
+        "mode": "normal",
+        "aspectRatio": "2:3",
+        "videoLength": 6,
+        "resolutionName": "480p",
+        "parentPostId": "<video-uuid>",
+        "isVideoEdit": false
+      }
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="image_edit — Single reference image edit">
+    ```json
+    {
+      "imageEditModelConfig": {
+        "imageReferences": ["https://assets.grok.com/users/<account-id>/<image-uuid>/content"],
+        "parentPostId": "<image-uuid>"
+      },
+      "imageEditModel": "imagine"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="multi_ref_image_edit — Multi-reference image edit">
+    ```json
+    {
+      "imageEditModelConfig": {
+        "imageReferences": ["<uuid-1>", "<uuid-2>"],
+        "parentPostId": "<primary-uuid>"
+      },
+      "imageEditModel": "imagine"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>

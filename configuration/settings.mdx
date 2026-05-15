@@ -1,0 +1,44 @@
+---
+title: "GVP Bridge App Settings and What You Can Configure"
+description: "What GVP Bridge manages automatically versus what you configure yourself — including default prompts, preview mode toggle, and browser connection status."
+---
+
+GVP Bridge is designed to minimize manual configuration. The app handles browser session management, account detection, and connection setup automatically through its Chrome DevTools Protocol (CDP) integration — so you can focus on generating content rather than wiring things together.
+
+## What the app manages automatically
+
+GVP Bridge takes care of the following without any action on your part:
+
+- **Browser profile** — The app launches Chrome using a dedicated `GVPChrome` profile. This profile is created automatically the first time you click Play, and it persists between sessions so you stay logged in.
+- **CDP port** — The Chrome DevTools Protocol port is managed internally by the app. You do not need to configure a port or pass any launch flags.
+- **Account detection** — Once you are logged into Grok inside the GVPChrome browser, the app automatically detects your active account and session by monitoring live browser traffic. This refreshes passively in the background every few seconds, so account switches are picked up immediately.
+
+<Note>
+  You do not need to enter an API key, account ID, or any authentication credentials inside GVP Bridge. All identity and session data is captured automatically from your active Grok browser session.
+</Note>
+
+## Settings you can configure
+
+### Default prompt
+
+You can set a default prompt that pre-populates the prompt field each time you open the app. This is useful if you frequently generate content with a consistent style or instruction.
+
+To change the default prompt, update it in the app's settings panel. It is stored locally and applied whenever you start a new generation session.
+
+### Preview mode
+
+Preview mode lets you inspect and verify the payload that will be sent to Grok before the generation is actually triggered. When preview mode is enabled, clicking **Fire** shows the constructed JSON payload instead of submitting it.
+
+<Tip>
+  Use preview mode when experimenting with new generation types or multi-reference configurations. It lets you confirm that the correct UUIDs, aspect ratios, and model config are included before committing to a generation.
+</Tip>
+
+Toggle preview mode on or off using the switch in the app settings panel. The setting is persisted across sessions.
+
+## Connection status
+
+The connection between GVP Bridge and the GVPChrome browser is established when you click **Play**. If the CDP client is not connected, generation requests will fail. You can check connection status in the app's status bar.
+
+<Note>
+  If the app shows "CDP Client not connected," click **Play** to launch the GVPChrome browser and establish the connection before attempting any generation.
+</Note>

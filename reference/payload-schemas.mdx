@@ -1,0 +1,129 @@
+---
+title: "GVP Bridge Generation Payload: Fields and Examples"
+description: "Field-level reference for the generation trigger payload, with complete JSON examples for every archetype — video, image edit, multi-reference, and extension."
+---
+
+When you trigger a generation in GVP Bridge, you supply a payload object that controls the output type, source assets, prompt, and quality settings. GVP Bridge reads this object, resolves the correct generation archetype, constructs the full request, and dispatches it automatically. The fields below describe everything you can configure in that payload.
+
+---
+
+## Payload fields
+
+<ParamField body="image_uuid" type="string" required>
+  UUID of the primary source image or video post. For video generation types, this becomes both the `fileAttachments` entry and the `parentPostId` in the model config. For image edits, it becomes the `parentPostId`. When `target_assets_url` is omitted, the backend constructs the asset URL as `https://assets.grok.com/users/{account_id}/{image_uuid}/content`.
+
+  **UUID extraction rule:** Always use the last UUID in a Grok asset URL. The first UUID is the user ID, not the content ID.
+</ParamField>
+
+<ParamField body="message" type="string">
+  The generation prompt. Also accepted as `prompt`. For video types, the backend wraps this into a formatted message string: `{asset_url}  {prompt} --mode=custom`. If omitted, the backend sets `--mode=normal`. For image edit types, the prompt is sent as the raw `message` field.
+</ParamField>
+
+<ParamField body="gen_type" type="string">
+  Selects the generation archetype. Accepted values:
+
+  | Value | Archetype |
+  |---|---|
+  | `"video"` | VanillaVideoGen (default) |
+  | `"multi_ref_video"` | MultiRefVideoGen |
+  | `"video_extend"` | VideoExtension |
+  | `"image_edit"` | VanillaImageEdit |
+  | `"multi_ref_image_edit"` | MultiRefImageEdit |
+
+  Defaults to `"video"` when omitted.
+</ParamField>
+
+<ParamField body="image_references" type="string[]">
+  Additional image UUIDs used as visual references. Required for `"multi_ref_video"` and `"multi_ref_image_edit"` types. For `VanillaImageEdit`, the single reference is derived from `image_uuid` and `target_assets_url` instead.
+</ParamField>
+
+<ParamField body="video_length" type="number">
+  Duration of the generated video in seconds. Applies to all video generation types. Defaults to `6`.
+</ParamField>
+
+<ParamField body="aspect_ratio" type="string">
+  Aspect ratio of the output. Passed directly as `aspectRatio` in `videoGenModelConfig`. Defaults to `"2:3"`. Examples: `"16:9"`, `"1:1"`, `"9:16"`.
+</ParamField>
+
+<ParamField body="resolution" type="string">
+  Output resolution, passed as `resolutionName` in `videoGenModelConfig`. Defaults to `"480p"`. Example: `"720p"`.
+</ParamField>
+
+<ParamField body="extend_start_time" type="number">
+  Seconds offset from which the video extension stitches onto the original. Only used for `"video_extend"` generation. Defaults to `10.041667`.
+</ParamField>
+
+<ParamField body="target_assets_url" type="string">
+  Explicit CDN URL for the source image asset. When provided, the backend uses this URL directly (stripping any `proxy?url=` wrapper if present) instead of constructing one from the account ID and image UUID. Useful when you have the exact asset URL already resolved from gallery data.
+</ParamField>
+
+---
+
+## Examples by generation type
+
+### Vanilla video generation
+
+```json
+{
+  "image_uuid": "abc123ef-0000-0000-0000-000000000001",
+  "message": "slow zoom out through morning fog",
+  "gen_type": "video",
+  "video_length": 6,
+  "aspect_ratio": "16:9",
+  "resolution": "720p"
+}
+```
+
+### Multi-reference video generation
+
+```json
+{
+  "image_uuid": "abc123ef-0000-0000-0000-000000000001",
+  "message": "cinematic pan across the scene",
+  "gen_type": "multi_ref_video",
+  "image_references": [
+    "abc123ef-0000-0000-0000-000000000002",
+    "abc123ef-0000-0000-0000-000000000003"
+  ],
+  "video_length": 6,
+  "aspect_ratio": "2:3",
+  "resolution": "480p"
+}
+```
+
+### Video extension
+
+```json
+{
+  "image_uuid": "abc123ef-0000-0000-0000-000000000004",
+  "gen_type": "video_extend",
+  "extend_start_time": 10.041667,
+  "video_length": 6,
+  "aspect_ratio": "2:3",
+  "resolution": "480p"
+}
+```
+
+### Vanilla image edit
+
+```json
+{
+  "image_uuid": "abc123ef-0000-0000-0000-000000000005",
+  "message": "make the sky a dramatic sunset",
+  "gen_type": "image_edit"
+}
+```
+
+### Multi-reference image edit
+
+```json
+{
+  "image_uuid": "abc123ef-0000-0000-0000-000000000005",
+  "message": "apply the color palette from the reference images",
+  "gen_type": "multi_ref_image_edit",
+  "image_references": [
+    "abc123ef-0000-0000-0000-000000000006",
+    "abc123ef-0000-0000-0000-000000000007"
+  ]
+}
+```

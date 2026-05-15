@@ -1,0 +1,104 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "sequoia",
+  "name": "GVP Bridge",
+  "description": "Documentation for GVP Bridge — automate AI video and image generation on Grok from your desktop.",
+  "colors": {
+    "primary": "#7C3AED",
+    "light": "#EDE9FE",
+    "dark": "#1E1B4B"
+  },
+  "favicon": "/favicon.ico",
+  "icons": {
+    "library": "lucide"
+  },
+  "metadata": {
+    "timestamp": true
+  },
+  "contextual": {
+    "options": ["copy", "view", "assistant"]
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/architecture",
+              "concepts/generation-pipeline",
+              "concepts/gallery"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/video-generation",
+              "guides/image-editing",
+              "guides/multi-reference",
+              "guides/video-extension",
+              "guides/gallery-sync"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/settings",
+              "configuration/generation-options"
+            ]
+          },
+          {
+            "group": "Troubleshooting",
+            "pages": [
+              "troubleshooting/common-issues",
+              "troubleshooting/moderation-errors"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "groups": [
+          {
+            "group": "IPC Events",
+            "pages": [
+              "reference/ipc-events",
+              "reference/generation-types"
+            ]
+          },
+          {
+            "group": "Payload Schemas",
+            "pages": [
+              "reference/payload-schemas",
+              "reference/stream-responses"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/hoangquangtung7019996-boop/GVP-Bridge-Deep-Dive"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/hoangquangtung7019996-boop/GVP-Bridge-Deep-Dive"
+    }
+  }
+}

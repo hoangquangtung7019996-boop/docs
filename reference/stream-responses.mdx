@@ -1,0 +1,121 @@
+---
+title: "GVP Bridge Stream Response Schemas and Field Guide"
+description: "Reference for the NDJSON stream responses GVP Bridge processes during generation — video and image edit field definitions, progress, and completion signals."
+---
+
+When GVP Bridge fires a generation request, the Grok API responds with a newline-delimited JSON (NDJSON) stream. GVP Bridge reads each line, parses the relevant fields, and re-emits them as `grok_generation_progress` events to the frontend. Understanding the raw stream structure helps you interpret progress states, debug unexpected results, or build on top of the generation pipeline.
+
+---
+
+## Video generation stream
+
+Each NDJSON line for a video generation wraps its data under `result.response.streamingVideoGenerationResponse`.
+
+```json
+{
+  "result": {
+    "response": {
+      "streamingVideoGenerationResponse": {
+        "progress": 45,
+        "moderated": false,
+        "originalPrompt": "a cat walking through autumn leaves",
+        "videoUrl": "https://video.cdn.grok.com/generated/abc123.mp4",
+        "thumbnailImageUrl": "https://video.cdn.grok.com/generated/abc123_thumb.jpg"
+      }
+    }
+  }
+}
+```
+
+<ResponseField name="result.response.streamingVideoGenerationResponse.progress" type="number">
+  Integer from `0` to `100` representing generation progress. The terminal success state is `progress: 100` combined with `moderated: false` and a non-empty `videoUrl`.
+</ResponseField>
+
+<ResponseField name="result.response.streamingVideoGenerationResponse.moderated" type="boolean">
+  `true` when Grok's safety filter has blocked this generation. A moderated line is a terminal state — subsequent lines will not carry a `videoUrl`. The streams store checks this field to transition the stream entry to `done: true` immediately.
+</ResponseField>
+
+<ResponseField name="result.response.streamingVideoGenerationResponse.originalPrompt" type="string">
+  The generation prompt echoed back by the API. Mapped to `promptEcho` in the `grok_generation_progress` IPC event.
+</ResponseField>
+
+<ResponseField name="result.response.streamingVideoGenerationResponse.videoUrl" type="string">
+  CDN URL of the generated video. Absent in early progress lines; present once the video is ready for download. Mapped to `mediaUrl` in the `grok_generation_progress` IPC event.
+</ResponseField>
+
+<ResponseField name="result.response.streamingVideoGenerationResponse.thumbnailImageUrl" type="string">
+  CDN URL of a lower-resolution thumbnail for the generated video. Typically available before `videoUrl`. Mapped to `thumbnailUrl` in the `grok_generation_progress` IPC event.
+</ResponseField>
+
+---
+
+## Image edit stream
+
+Each NDJSON line for an image edit uses `result.response.streamingImageGenerationResponse` instead. The image edit model (`imagine-image-edit`) generates two candidate images by default, identified by `imageIndex`.
+
+```json
+{
+  "result": {
+    "response": {
+      "streamingImageGenerationResponse": {
+        "progress": 80,
+        "moderated": false,
+        "imageIndex": 0,
+        "originalPrompt": "make it a dramatic sunset",
+        "imageUrl": "https://img.cdn.grok.com/edited/xyz789.jpg",
+        "thumbnailImageUrl": "https://img.cdn.grok.com/edited/xyz789_thumb.jpg"
+      }
+    }
+  }
+}
+```
+
+<ResponseField name="result.response.streamingImageGenerationResponse.progress" type="number">
+  Integer from `0` to `100`. Terminal success is `progress: 100` with `moderated: false` and a non-empty `imageUrl`.
+</ResponseField>
+
+<ResponseField name="result.response.streamingImageGenerationResponse.moderated" type="boolean">
+  `true` when the safety filter has blocked this image edit. Same terminal semantics as the video stream.
+</ResponseField>
+
+<ResponseField name="result.response.streamingImageGenerationResponse.imageIndex" type="number">
+  Zero-based index of the candidate image in the batch. Because the model generates two candidates by default (`imageGenerationCount: 2`), you will typically see lines with `imageIndex: 0` and `imageIndex: 1` within the same stream.
+</ResponseField>
+
+<ResponseField name="result.response.streamingImageGenerationResponse.originalPrompt" type="string">
+  The edit instruction echoed back by the API. Mapped to `promptEcho` in the `grok_generation_progress` IPC event.
+</ResponseField>
+
+<ResponseField name="result.response.streamingImageGenerationResponse.imageUrl" type="string">
+  CDN URL of the edited image. Mapped to `mediaUrl` in the `grok_generation_progress` IPC event.
+</ResponseField>
+
+<ResponseField name="result.response.streamingImageGenerationResponse.thumbnailImageUrl" type="string">
+  CDN URL of a thumbnail preview for the edited image. Mapped to `thumbnailUrl` in the `grok_generation_progress` IPC event.
+</ResponseField>
+
+---
+
+## Terminal signals
+
+Every stream ends with one of two completion signals. The backend handles both automatically — you do not need to implement any special detection logic in your frontend code.
+
+<Note>
+  Both `[DONE]` and `stream_end` are detected and handled by the GVP Bridge backend. When either signal is received, the backend emits a `grok_stream_complete` IPC event with the relevant `stream_id`. The streams store responds by setting `done: true` on the stream entry and triggering a gallery refresh via `fetchGallery()`.
+</Note>
+
+### `[DONE]`
+
+The primary completion signal. The Grok API appends a literal `[DONE]` line to the NDJSON stream to indicate that no further chunks will follow. This is the standard SSE/NDJSON completion convention.
+
+```
+[DONE]
+```
+
+### `stream_end` meta-event
+
+A fallback completion signal emitted internally by the stream reader when the HTTP response body closes without a `[DONE]` line. This handles edge cases such as network interruptions or early server-side closes.
+
+```json
+{ "type": "stream_end", "stream_id": "1715000000000-a3f9" }
+```

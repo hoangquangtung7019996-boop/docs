@@ -1,0 +1,72 @@
+---
+title: 'Use Multiple Image References for Generation in GVP Bridge'
+description: 'Feed two or more gallery images into a single generation to guide style, subject, or composition — works for both video generation and image-edit workflows.'
+---
+
+Multi-reference mode lets you combine several existing images into one generation request. You designate a primary image and attach additional images as style or content references. GVP Bridge supports multi-reference for both video generation (`MultiRefVideoGen`) and image editing (`MultiRefImageEdit`).
+
+## How references are identified
+
+Every image in Grok is identified by a UUID embedded in its asset URL. GVP Bridge extracts UUIDs automatically from gallery cards — but when you add references manually, you must use the **last** UUID in the URL, not the first.
+
+<Note>
+  Grok asset URLs contain two UUIDs. The first identifies the **user account**; the second identifies the **asset**. Always use the last UUID as the image reference. Example URL structure: `https://assets.grok.com/users/{userId}/{assetId}/content` — use `{assetId}`.
+</Note>
+
+## Multi-reference video generation
+
+<Steps>
+  <Step title="Connect your browser">
+    Click **Play** and wait for the green status indicator.
+  </Step>
+  <Step title="Select the primary image">
+    Click your main subject image in the gallery. This becomes the central reference the video is built around.
+  </Step>
+  <Step title="Set the generation type">
+    Open the **Generation type** selector and choose **Multi-Reference Video** (`MultiRefVideoGen`).
+  </Step>
+  <Step title="Add additional image references">
+    In the **References** field, paste the asset UUID (the last UUID from the URL) for each additional image, one per line or comma-separated.
+  </Step>
+  <Step title="Write your prompt">
+    Enter a prompt that describes how you want Grok to blend or interpret the references.
+  </Step>
+  <Step title="Set video options and click Fire">
+    Adjust aspect ratio, video length, and resolution as needed, then click **Fire**. GVP Bridge automatically includes all your reference UUIDs alongside the primary image.
+  </Step>
+  <Step title="Monitor and collect your video">
+    Watch the **GenerationMonitor** sidebar. The video appears in your gallery when the stream reaches 100 % progress.
+  </Step>
+</Steps>
+
+## Multi-reference image editing
+
+The image-edit variant follows the same pattern. GVP Bridge routes the reference UUIDs into the image edit configuration automatically.
+
+<Steps>
+  <Step title="Select the primary image">
+    Click the image you want to edit in the gallery.
+  </Step>
+  <Step title="Set the generation type">
+    Choose **Multi-Reference Image Edit** (`MultiRefImageEdit`) from the generation type selector.
+  </Step>
+  <Step title="Add reference UUIDs">
+    Paste the last UUID from each reference image URL into the **References** field.
+  </Step>
+  <Step title="Write your edit prompt and click Fire">
+    Describe the edit you want, then click **Fire**. Two edited variants stream back, each incorporating your reference images.
+  </Step>
+</Steps>
+
+<Tip>
+  When choosing reference images, pick assets that are already in your synced gallery — their UUIDs are displayed in the gallery card tooltip or info panel, so you don't need to dig into raw URLs.
+</Tip>
+
+<Warning>
+  Passing a userId UUID instead of an assetId UUID causes the generation to fail silently or produce incorrect output. Double-check that you are copying the last UUID segment of the URL.
+</Warning>
+
+## Next steps
+
+- [Edit a single image with AI](/guides/image-editing) for a simpler one-reference workflow.
+- [Generate a video from a single image](/guides/video-generation) for the standard video path.

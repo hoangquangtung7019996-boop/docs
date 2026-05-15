@@ -1,0 +1,98 @@
+---
+title: 'GVP Bridge Generation Pipeline: From Click to Media'
+description: 'Follow a generation from the moment you click Fire through interception, payload mutation, live stream monitoring, and final delivery to your gallery.'
+---
+
+Every time you trigger a generation in GVP Bridge — whether through the **Fire** button on a gallery card or **InstaGen** — the app runs the same five-step pipeline automatically. You see only the beginning (clicking a button) and the end (media appearing in your gallery), but understanding what happens in between helps you interpret the GenerationMonitor sidebar and react correctly when something unexpected occurs.
+
+## The five-step lifecycle
+
+<Steps>
+  <Step title="You trigger the generation">
+    You click **Fire** or **InstaGen** on a gallery card in the desktop app. The app immediately locks in your current prompt, generation type, and settings (aspect ratio, resolution, video length, image references) as a pending payload and marks itself as **armed**.
+
+    - **Fire** — mutates the generation type before triggering (for example, turning a video post into an Image Edit).
+    - **InstaGen** — triggers generation directly against the existing post type without mutation.
+
+    <Info>
+      Only one generation can be armed at a time. If you trigger a second generation while one is in-flight, wait for the active stream to complete or reach a terminal state first.
+    </Info>
+  </Step>
+
+  <Step title="The app intercepts Grok's outgoing request">
+    The desktop app injects a script into GVPChrome that finds Grok's native generation button and fires an authentic pointer event. Grok begins composing its own request to its `/new` or `/generate` endpoint.
+
+    The moment that request leaves the browser, GVP Bridge catches it via the Chrome DevTools Protocol. Because the app is armed, the request is held — it has not yet reached Grok's servers.
+
+    <Note>
+      The interception only targets Grok's generation endpoints. Image upload requests (`/media/post/create`) are never touched and always pass through unmodified.
+    </Note>
+  </Step>
+
+  <Step title="The payload is mutated and released">
+    The desktop app strips Grok's original request body and constructs a new one from your pending payload. This includes your prompt text, generation archetype, and all configured parameters.
+
+    The app then immediately **disarms** — clearing the pending payload so no future requests are accidentally intercepted — and releases the modified request to the network with the original authentication headers intact.
+
+    The generation archetypes you can use include:
+
+    <AccordionGroup>
+      <Accordion title="Vanilla Video Generation">
+        Generates a new video from a single source image using your prompt.
+      </Accordion>
+      <Accordion title="Multi-Reference Video Generation">
+        Generates a video referencing multiple source images simultaneously.
+      </Accordion>
+      <Accordion title="Video Extension">
+        Extends an existing video from a specified start time using your prompt.
+      </Accordion>
+      <Accordion title="Vanilla Image Edit">
+        Applies your prompt as an edit to a single source image.
+      </Accordion>
+      <Accordion title="Multi-Reference Image Edit">
+        Applies your prompt as an edit using multiple image references.
+      </Accordion>
+    </AccordionGroup>
+  </Step>
+
+  <Step title="Real-time progress streams into GenerationMonitor">
+    Grok's response arrives as an NDJSON stream — a sequence of JSON events, one per line. The desktop app reads each chunk as it arrives and fires `grok_generation_progress` events to the frontend.
+
+    The **GenerationMonitor** sidebar updates in real time, showing:
+    - The generation's unique stream ID
+    - A live progress percentage
+    - Status messages from Grok's processing pipeline
+
+    Each generation is tracked independently by a unique ID so you can monitor multiple in-flight generations simultaneously.
+
+    <Tip>
+      Keep the GenerationMonitor sidebar open while generations run. It is the fastest way to see whether a generation is progressing, stalled, or has hit a content policy block.
+    </Tip>
+  </Step>
+
+  <Step title="Generation completes and media lands in your gallery">
+    The stream ends in one of two ways:
+
+    - **`[DONE]` signal** — Grok's primary completion marker. The app receives the final media URL and writes the result to your local gallery database.
+    - **`stream_end` meta-event** — A fallback completion signal fired when the stream reader closes without an explicit `[DONE]`. The app treats this identically.
+
+    Once complete, the gallery refreshes automatically and your new media appears as a gallery card.
+  </Step>
+</Steps>
+
+## Terminal states
+
+Not every generation ends with media. Two terminal states are possible:
+
+<CardGroup cols={2}>
+  <Card title="Success" icon="circle-check">
+    Progress reaches 100% and the app receives a media URL. The item is written to your gallery and the card updates to show the new media immediately.
+  </Card>
+  <Card title="Moderated" icon="shield-x">
+    Grok's content policy blocked the generation. The stream parser detects a `moderated: true` flag in the NDJSON data and immediately flips the generation to an error state in GenerationMonitor. No media is saved.
+  </Card>
+</CardGroup>
+
+<Note>
+  If a generation is moderated, try rephrasing your prompt to avoid terms that trigger Grok's content filters. The desktop app does not modify or soften prompts automatically.
+</Note>

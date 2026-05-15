@@ -1,0 +1,105 @@
+---
+title: "Fix Common GVP Bridge Connection and Generation Issues"
+description: "Fixes for common GVP Bridge errors — browser connection failures, missing Grok tabs, empty gallery, Chrome launch problems, and stalled generation requests."
+---
+
+Most issues with GVP Bridge fall into a small number of categories: the browser isn't connected yet, Grok hasn't loaded in the right window, a required asset hasn't been selected, or the Fetch interceptor needs a reset. Work through the relevant section below to resolve the problem quickly.
+
+<AccordionGroup>
+  <Accordion title="Error: CDP Client not connected">
+    This error appears when GVP Bridge tries to send a generation request but has no active connection to the GVPChrome browser.
+
+    **Why it happens:** The CDP connection is only established after you click **Play** to launch the browser. If you click **Fire** before the browser is running, there is nothing for the app to connect to.
+
+    **How to fix it:**
+
+    1. Click the **Play** button in GVP Bridge to launch the GVPChrome browser.
+    2. Wait for the status indicator to show a connected state.
+    3. If Grok does not open automatically, navigate to `grok.com` in the GVPChrome window.
+    4. Try your generation again.
+
+    <Note>
+      Do not close the GVPChrome browser window while generating. Closing it severs the CDP connection and will cause this error on the next request.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Error: Failed to find Grok tab after 30 seconds">
+    GVP Bridge scans for an open Grok tab when setting up the Fetch interceptor. If no tab is found within 30 seconds, this error is thrown.
+
+    **Why it happens:** The GVPChrome browser is running, but `grok.com` is not open in any tab, or the tab hasn't finished loading.
+
+    **How to fix it:**
+
+    1. Switch to the GVPChrome browser window.
+    2. Open a new tab and navigate to `grok.com`.
+    3. Wait for the page to fully load.
+    4. Return to GVP Bridge — the app retries the tab search up to 30 times automatically, so you may not need to do anything else once Grok is open.
+
+    <Tip>
+      Keep the Grok tab open and in the foreground during generation. Minimizing or navigating away can sometimes delay tab detection.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Error: No image UUID provided for generation">
+    This error fires when you click **Fire** without a target asset selected.
+
+    **Why it happens:** Most generation types — including `video`, `image_edit`, `multi_ref_video`, and `video_extend` — require at least one image or video asset UUID. The app cannot construct a valid payload without one.
+
+    **How to fix it:**
+
+    1. Open the gallery panel in GVP Bridge.
+    2. Select the image or video you want to use as the reference asset.
+    3. For multi-reference generation types, select all relevant assets before clicking **Fire**.
+    4. Confirm the selection appears in the generation panel, then click **Fire**.
+  </Accordion>
+
+  <Accordion title="Gallery is empty or not showing your content">
+    If the gallery panel is blank or doesn't reflect your Grok library, the app likely hasn't detected your active account yet.
+
+    **Why it happens:** The gallery is filtered to your active Grok account, which GVP Bridge detects automatically by monitoring live browser traffic. If you are not logged in, or the browser hasn't made a request to `grok.com` yet, the account ID is not available.
+
+    **How to fix it:**
+
+    1. Open the GVPChrome browser and navigate to `grok.com`.
+    2. Log in to your Grok account if you haven't already.
+    3. Browse or interact with the page — this triggers the network requests that the app monitors.
+    4. Return to GVP Bridge. The account ID is refreshed automatically every 3 seconds, so the gallery should populate shortly.
+
+    <Note>
+      Each Grok account has its own asset library. If you are logged into a different account than expected, log out in GVPChrome and log back in with the correct account.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Chrome fails to launch">
+    GVP Bridge cannot start the GVPChrome browser when you click **Play**.
+
+    **Why it happens:** The app relies on a Chrome or Chromium installation on your system. If Chrome is not installed, or the executable cannot be found at the expected path, the launch fails.
+
+    **How to fix it:**
+
+    1. Confirm that Google Chrome or Chromium is installed on your machine.
+    2. If Chrome is installed in a non-standard location, check whether your OS allows overriding the executable path.
+    3. Reinstall Chrome if the installation appears corrupted.
+
+    <Note>
+      GVP Bridge uses the `GVPChrome` profile — a separate, dedicated browser profile managed entirely by the app. Your personal Chrome profiles and data are never touched.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Generation triggered but no progress appears">
+    You clicked **Fire** and the generation seemed to start, but the progress indicator never moves and no result is shown.
+
+    **Why it happens:** GVP Bridge uses a request interceptor to pause and mutate the outgoing API request before it reaches Grok. In rare cases, a previous session or a failed generation can leave the interceptor in an inconsistent state, causing the request to be silently dropped.
+
+    **How to fix it:**
+
+    1. Switch to the GVPChrome browser.
+    2. Refresh the Grok tab (`Ctrl+R` / `Cmd+R`).
+    3. Wait for the page to fully reload.
+    4. Return to GVP Bridge and trigger the generation again.
+
+    <Tip>
+      The request interceptor disarms itself after one successful mutation to prevent loops. A page refresh re-arms it cleanly for the next request.
+    </Tip>
+  </Accordion>
+</AccordionGroup>

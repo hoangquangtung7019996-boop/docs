@@ -1,0 +1,53 @@
+---
+title: 'Extend a Generated Video to Make It Longer in GVP Bridge'
+description: 'Lengthen an existing Grok-generated video by stitching a new segment onto it. Control the start time offset and GVP Bridge handles the stitching automatically.'
+---
+
+Video extension takes a video you have already generated and produces a new continuation segment. GVP Bridge stitches the new segment onto the original automatically using `stitchWithExtendPostId: true`, so the final output is a single longer video — not a separate clip you have to combine manually.
+
+## How extension works
+
+When you click Fire in extension mode, GVP Bridge sets `isVideoExtension: true` in the payload and links the new request back to the original video via `extendPostId`. The extension starts from a configurable time offset. By default, the extension begins at **10.041667 seconds** into the original video (`videoExtensionStartTime`).
+
+## Extend a video
+
+<Steps>
+  <Step title="Connect your browser">
+    Click **Play** and confirm the status indicator is green before continuing.
+  </Step>
+  <Step title="Find the video to extend">
+    Locate the generated video in your gallery. Videos are displayed as children of the source image that produced them.
+  </Step>
+  <Step title="Open the extension options">
+    Click **Extend** on the video card. GVP Bridge pre-selects the video UUID as the target and switches the generation type to `VideoExtension` automatically.
+  </Step>
+  <Step title="Set the start time (optional)">
+    The **Extend start time** field defaults to `10.041667` seconds. Adjust this value if you want the extension to branch from a different point in the original video.
+
+    <Note>
+      The start time is passed as `videoExtensionStartTime` in the payload. It must be a decimal number (seconds). Values beyond the actual video duration may produce unexpected results.
+    </Note>
+  </Step>
+  <Step title="Click Fire">
+    Click **Fire**. GVP Bridge triggers Grok's native flow, intercepts the outgoing request, and submits the extension payload automatically. The app stitches the new segment onto the original video without any extra steps from you.
+  </Step>
+  <Step title="Monitor the extension">
+    The **GenerationMonitor** sidebar shows progress for the new segment. Extension generations run at the same resolution and aspect ratio as the original.
+  </Step>
+  <Step title="Find the extended video in your gallery">
+    When the stream reaches 100 % progress, the stitched video is saved to your gallery, linked to the same source image as the original.
+  </Step>
+</Steps>
+
+<Tip>
+  If you want to extend a video multiple times, run extension again on the most recent extended video, not on the original. Each extension chains off the previous result.
+</Tip>
+
+<Warning>
+  You cannot change the aspect ratio or resolution during extension. The payload inherits these values from the target video's existing settings. Changing them in the UI has no effect on an extension request.
+</Warning>
+
+## Next steps
+
+- [Generate a new video from scratch](/guides/video-generation) from any gallery image.
+- [Use multiple image references](/guides/multi-reference) to guide the next generation with more sources.
